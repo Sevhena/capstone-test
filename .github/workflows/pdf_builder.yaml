@@ -18,7 +18,7 @@ jobs:
       - name: set-doc-path
         run: echo "$HOME/docs" >> $GITHUB_PATH
       - name: set-workspace-dir
-        run: echo "$HOME/docs" >> $GITHUB_PATH
+        run: echo "$HOME/docs" >> $GITHUB_WORKSPACE
   changed-tex-files:
     needs: set-doc-path
     runs-on: ubuntu-latest
