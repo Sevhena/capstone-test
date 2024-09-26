@@ -59,7 +59,7 @@ jobs:
 
       - name: Execute Python script # Run the run.py to get the latest data
         run: |
-          for file in ${{ steps.changed-tex-files.outputs.all_changed_files }}; do
+          for file in ${{ ALL_CHANGED_FILES }}; do
             echo "Building PDF for $file"
             python ./compile.py $file
           done
