@@ -1,82 +1,63 @@
-name: LaTeX to pdf builder
+name: LaTeX to PDF Builder
 
 on:
   pull_request:
-    # Sequence of patterns matched against refs/heads
     branches:
       - main
-    types:
-      - opened
     paths:
-      - '**/**.tex'
+      - 'docs/**/*.tex'
 
 jobs:
-  set-doc-path:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v1
-      - name: set-doc-path
-        run: echo "$HOME/docs" >> $GITHUB_PATH
-  changed-tex-files:
-    needs: set-doc-path
-    runs-on: ubuntu-latest
-    name: Get all changed tex files
-    permissions:
-      pull-requests: read
-    # -------------------------------------------------------------
-    # Event `pull_request`: Returns all changed pull request files.
-    # --------------------------------------------------------------
-    steps:
+      # Checkout the repository content
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Get the list of changed .tex files
       - name: Get changed tex files
         id: changed-tex-files
-        uses: tj-actions/changed-files@v45
-        with:
-          files: |
-            **.tex
-          diff_relative: true
-          files_ignore: docs/*.tex
-
-      - name: Save all
-        if: steps.changed-tex-files.outputs.any_changed == 'true'
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
-        run: echo "$ALL_CHANGED_FILES"
-      - name: Checkout repository content
-        uses: actions/checkout@v2 # Checkout the repository content to github runner.
-
-      - name: Setup Python Version
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8 # Install the python version needed
-
-      - name: Install Python dependencies
-        run: python -m pip install --upgrade pip requests
-
-      - name: Execute Python script # Run the run.py to get the latest data
         run: |
-          for file in ${ALL_CHANGED_FILES}; do
-            echo "Building PDF for $file"
-            python ./compile.py $file
-          done
-  # build:
-  #   needs: changed-tex-files
-  #   runs-on: ubuntu-latest
-  #   name: Build PDFs
-  #   steps:
-  #     - name: Checkout repository content
-  #       uses: actions/checkout@v2 # Checkout the repository content to github runner.
+          echo "Changed tex files:"
+          git diff --name-only origin/main -- docs/**/*.tex > changed_files.txt
+          cat changed_files.txt
 
-  #     - name: Setup Python Version
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: 3.8 # Install the python version needed
+      # Compile each changed LaTeX file using latex-action
+      - name: Compile changed LaTeX files
+        run: |
+          while IFS= read -r file; do
+            echo "Compiling $file"
+            gh api --method POST /repos/${{ github.repository }}/actions/workflows/latex-action.yml/dispatches \
+              -f root_file="$file" \
+              -f latexmk_options="-pdf -bibtex"  # Include bibtex or biber as needed
+          done < changed_files.txt
 
-  #     - name: Install Python dependencies
-  #       run: python -m pip install --upgrade pip requests
+      # Commit the generated PDFs back to the repository
+            # Commit the generated PDFs back to the repository
+      - name: Commit generated PDFs
+        run: |
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          PR_EMAIL="${{ github.event.pull_request.user.email }}"
 
-  #     - name: Execute Python script # Run the run.py to get the latest data
-  #       run: |
-  #         for file in ${ALL_CHANGED_FILES}; do
-  #           echo "Building PDF for $file"
-  #           python ./compile.py $file
-  #         done
+          if [ -z "$PR_EMAIL" ]; then
+            # Fallback to a generic email if no email is found
+            PR_EMAIL="github-actions[bot]@users.noreply.github.com"
+          fi
+
+          git config --global user.name "$PR_AUTHOR"
+          git config --global user.email "$PR_EMAIL"
+
+          git add docs/**/*.pdf
+          git commit -m "Add generated PDFs for changed LaTeX files"
+          git push
+        if: success()
+
+
+      # (Optional) Upload PDFs as artifacts
+      - name: Upload PDFs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-pdfs
+          path: docs/**/*.pdf
