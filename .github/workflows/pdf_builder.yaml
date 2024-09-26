@@ -32,7 +32,7 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           diff_relative: true
-          files_ignore: '$GITHUB_PATH/*.tex'
+          files_ignore: docs/*.tex
 
       - name: Save all
         if: steps.changed-tex-files.outputs.any_changed == 'true'
