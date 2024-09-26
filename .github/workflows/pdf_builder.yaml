@@ -1,0 +1,43 @@
+name: LaTeX to pdf builder
+
+on:
+  pull_request:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      - main
+    types:
+      - opened
+    # paths:
+    #   - '**/**.tex'
+
+jobs:
+  set-doc-path:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: set-doc-path
+        run: echo "$HOME/docs" >> $GITHUB_PATH
+  changed-tex-files:
+    needs: set-doc-path
+    runs-on: ubuntu-latest
+    name: Get all changed tex files
+    permissions:
+      pull-requests: read
+    # -------------------------------------------------------------
+    # Event `pull_request`: Returns all changed pull request files.
+    # --------------------------------------------------------------
+    steps:
+      - name: Get changed tex files
+        id: changed-tex-files
+        uses: tj-actions/changed-files@v45
+        with:
+          diff_relative: true
+
+      - name: Save all
+        if: steps.changed-tex-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
+        run: echo "$ALL_CHANGED_FILES"
+    # build:
+    #   runs-on: ubuntu-latest
+    #   uses: actions/checkout@v4
