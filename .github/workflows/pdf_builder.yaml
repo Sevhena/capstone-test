@@ -31,6 +31,8 @@ jobs:
         id: changed-tex-files
         uses: tj-actions/changed-files@v45
         with:
+          files: |
+             **.tex
           diff_relative: true
           dir_names: true
           files_ignore: docs/*.tex
