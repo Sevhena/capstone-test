@@ -34,7 +34,6 @@ jobs:
           files: |
             **.tex
           diff_relative: true
-          dir_names: true
           files_ignore: docs/*.tex
 
       - name: Save all
@@ -46,8 +45,19 @@ jobs:
     runs-on: ubuntu-latest
     name: Build PDFs
     steps:
-      - uses: actions/checkout@v4
-      - name: Save directory commands
-        run: declare -A makeCmds=( ["ProblemStatementAndGoals"]="PS" ["DevelopmentPlan"]="DevP" )
-      - name: Test dictionary
-        run: echo "${makeCmds[ProblemStatementAndGoals]}"
+      - name: Checkout repository content
+        uses: actions/checkout@v2 # Checkout the repository content to github runner.
+
+      - name: Setup Python Version
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 # Install the python version needed
+
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip requests
+
+      - name: Execute Python script # Run the run.py to get the latest data
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            python .\compile.py ${file}
+          done
