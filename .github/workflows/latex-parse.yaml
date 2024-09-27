@@ -33,7 +33,9 @@ jobs:
           while IFS= read -r file; do
             echo "Compiling $file"
             gh api --method POST /repos/${{ github.repository }}/actions/workflows/pdf-build.yml/dispatches \
-              -f "ref=${{ github.head_ref }}"
-              -f "inputs[latexmk_options]="-pdf -bibtex"" \
-              -f "inputs[root_file]=$file"
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -f "ref=${{ github.head_ref }}" \
+            -f "inputs[latexmk_options]="-pdf -bibtex"" \
+            -f "inputs[root_file]=$file" \
           done < changed_files.txt
