@@ -1,4 +1,4 @@
-name: Compile LaTeX Document
+name: 'Compile LaTeX Document'
 
 on:
   workflow_dispatch:
