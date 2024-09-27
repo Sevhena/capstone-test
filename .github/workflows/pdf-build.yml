@@ -10,6 +10,7 @@ on:
         description: 'Options for latexmk (e.g., -pdf -bibtex)'
         default: '-pdf'
         required: true
+  pull_request:
 
 jobs:
   build:
