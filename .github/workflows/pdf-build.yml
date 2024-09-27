@@ -1,0 +1,45 @@
+name: 'Compile LaTeX Document'
+
+on:
+  workflow_dispatch:
+    inputs:
+      root_file:
+        description: 'The root LaTeX file to compile'
+        required: true
+      latexmk_options:
+        description: 'Options for latexmk (e.g., -pdf -bibtex)'
+        default: '-pdf'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # # Install TeX Live
+      # - name: Install TeX Live
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y texlive-full
+
+      # Compile LaTeX with specified options
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: ${{ github.event.inputs.root_file }}
+          latexmk_options: ${{ github.event.inputs.latexmk_options }}
+
+      # Commit the generated PDF back to the repository
+      - name: Commit generated PDF
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          TEX_FILE=$(basename "${{ github.event.inputs.root_file }}")  # Extract only the .tex filename
+          git add $(dirname "${{ github.event.inputs.root_file }}")/*.pdf
+          git commit -m "Add compiled PDF for ${TEX_FILE}.tex"
+          git push
