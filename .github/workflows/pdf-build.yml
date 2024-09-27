@@ -1,0 +1,52 @@
+name: 'Compile LaTeX Document'
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**/*.tex'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install TeX Live
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive-latex-extra
+          sudo apt -y install texlive-science
+
+      # Get changed .tex files
+      - name: Get changed .tex files
+        id: changed-tex-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.tex
+          diff_relative: true  # Get the list of files relative to the repo root
+
+      # Build LaTeX files
+      - name: Build changed tex files
+        if: steps.changed-tex-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
+        run: |
+          cd docs
+          for file in ${ALL_CHANGED_FILES}; do
+            make ${{ vars.${${file}##*/} }}
+            make 'clean${{ vars.${$file##*/} }}'
+          done
+          
+      # Commit the generated PDF back to the repository
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${GH_TOKEN}
+          message: 'Add compiled PDF for $(basename "${{ github.event.inputs.root_file }}").tex'
