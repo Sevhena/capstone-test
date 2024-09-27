@@ -33,6 +33,7 @@ jobs:
           while IFS= read -r file; do
             echo "Compiling $file"
             gh api --method POST /repos/${{ github.repository }}/actions/workflows/pdf-build.yml/dispatches \
-              -f root_file="$file" \
-              -f latexmk_options="-pdf -bibtex"  # Include bibtex or biber as needed
+              -f "ref=${{ github.head_ref }}"
+              -f "inputs[latexmk_options]="-pdf -bibtex"" \
+              -f "inputs[root_file]=$file"
           done < changed_files.txt
