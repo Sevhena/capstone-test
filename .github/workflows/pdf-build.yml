@@ -33,6 +33,8 @@ jobs:
         with:
           root_file: ${{ github.event.inputs.root_file }}
           latexmk_options: ${{ github.event.inputs.latexmk_options }}
+        env:
+          TEXINPUTS: ".:/docs/"
 
       # Commit the generated PDF back to the repository
       - name: Commit generated PDF
