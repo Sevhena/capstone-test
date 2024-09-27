@@ -1,4 +1,4 @@
-name: LaTeX to PDF Builder
+name: Find changed tex files
 
 on:
   pull_request:
@@ -36,31 +36,3 @@ jobs:
               -f root_file="$file" \
               -f latexmk_options="-pdf -bibtex"  # Include bibtex or biber as needed
           done < changed_files.txt
-
-      # Commit the generated PDFs back to the repository
-            # Commit the generated PDFs back to the repository
-      - name: Commit generated PDFs
-        run: |
-          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          PR_EMAIL="${{ github.event.pull_request.user.email }}"
-
-          if [ -z "$PR_EMAIL" ]; then
-            # Fallback to a generic email if no email is found
-            PR_EMAIL="github-actions[bot]@users.noreply.github.com"
-          fi
-
-          git config --global user.name "$PR_AUTHOR"
-          git config --global user.email "$PR_EMAIL"
-
-          git add docs/**/*.pdf
-          git commit -m "Add generated PDFs for changed LaTeX files"
-          git push
-        if: success()
-
-
-      # (Optional) Upload PDFs as artifacts
-      - name: Upload PDFs as artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: compiled-pdfs
-          path: docs/**/*.pdf
