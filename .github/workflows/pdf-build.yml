@@ -22,11 +22,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Install TeX Live
-      - name: Install TeX Live
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y texlive-full
+      # # Install TeX Live
+      # - name: Install TeX Live
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y texlive-full
 
       # Compile LaTeX with specified options
       - name: Compile LaTeX document
