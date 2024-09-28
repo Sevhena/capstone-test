@@ -48,9 +48,8 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
         run: |
-          cd ~
-          ls
-          cd -
+          whereis latex
+          whereis latexmk
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
             folder=$(dirname "$file")  # Get the folder of the file
