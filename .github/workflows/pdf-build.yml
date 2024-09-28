@@ -19,7 +19,7 @@ jobs:
       # Cache TeX Live and latexmk installation
       - name: Cache TeX Live
         id: texlive-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /usr/local/texlive
           key: texlive-2023-ubuntu-latexmk
@@ -48,13 +48,16 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
         run: |
+          ls
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
             folder=$(dirname "$file")  # Get the folder of the file
             echo "Building $filename"
             cd "$folder"  # Change to the folder where the tex file is located
             make 
+            ls
             make clean
+            ls
             cd -  # Go back to root folder
           done
           
