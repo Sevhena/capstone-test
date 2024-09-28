@@ -48,7 +48,9 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
         run: |
+          cd ..
           ls
+          cd capstone-test
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
             folder=$(dirname "$file")  # Get the folder of the file
@@ -60,6 +62,7 @@ jobs:
             ls
             cd -  # Go back to root folder
           done
+          git status
           
       # Commit the generated PDF back to the repository
       - name: Commit & Push changes
