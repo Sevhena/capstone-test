@@ -48,7 +48,7 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
         run: |
-          cd ../..
+          cd ~
           ls
           cd -
           for file in ${ALL_CHANGED_FILES}; do
