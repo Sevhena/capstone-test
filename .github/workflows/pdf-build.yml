@@ -41,9 +41,9 @@ jobs:
           cd docs
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
-            FILE_CMD="vars.${filename%.*}"
-            make ${{ "$FILE_CMD" }}
-            make "clean${{ "$FILE_CMD" }}"
+            FILE_CMD="${filename%.*}"
+            make ${{ vars.$FILE_CMD }}
+            make "clean${{ vars.$FILE_CMD }}"
           done
           
       # Commit the generated PDF back to the repository
