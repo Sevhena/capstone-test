@@ -52,6 +52,9 @@ jobs:
         run: |
           whereis latex
           whereis latexmk
+          cd ~
+          ls -a
+          cd -
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
             folder=$(dirname "$file")  # Get the folder of the file
