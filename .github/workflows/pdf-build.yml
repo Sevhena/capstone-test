@@ -71,4 +71,6 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: --force docs/**/*.pdf
-          message: "Add compiled PDF for $ALL_CHANGED_FILES"
+          author_name: "Github Action"
+          author_email: "action@github.com"
+          message: "Add compiled PDF"
