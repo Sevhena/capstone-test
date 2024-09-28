@@ -16,13 +16,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Cache TeX Live and latexmk installation
+      # Cache TeX Live installation
       - name: Cache TeX Live
-        id: texlive-cache
         uses: actions/cache@v4
         with:
-          path: /usr/local/texlive
-          key: texlive-2023-ubuntu-latexmk
+          path: |
+            /usr/local/texlive # Adjust to where TeX Live is installed
+            /usr/share/texlive
+            ~/.texlive
+          key: texlive-2023-${{ runner.os }}-latexmk
           restore-keys: |
             texlive-
 
