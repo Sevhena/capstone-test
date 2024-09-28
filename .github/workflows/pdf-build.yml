@@ -30,7 +30,7 @@ jobs:
 
       # Install TeX Live and latexmk if cache is not available
       - name: Install TeX Live and latexmk
-        if: steps.texlive-cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install texlive-latex-extra texlive-science latexmk
