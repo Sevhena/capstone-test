@@ -16,12 +16,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install TeX Live
-      - name: Install TeX Live
+      # Cache TeX Live and latexmk installation
+      - name: Cache TeX Live
+        id: texlive-cache
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/texlive
+          key: texlive-2023-ubuntu-latexmk
+          restore-keys: |
+            texlive-
+
+      # Install TeX Live and latexmk if cache is not available
+      - name: Install TeX Live and latexmk
+        if: steps.texlive-cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install texlive-latex-extra
-          sudo apt -y install texlive-science
+          sudo apt-get install texlive-latex-extra texlive-science latexmk
 
       # Get changed .tex files
       - name: Get changed .tex files
