@@ -41,9 +41,12 @@ jobs:
           cd docs
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
-            FILE_CMD="${filename%.*}"
-            make "${{ env[format(vars.$FILE_CMD)] }}"
-            make "clean${{ env[format(vars.$FILE_CMD)] }}
+            folder=$(dirname "$file")  # Get the folder of the file
+            echo "Building $filename"
+            cd "$folder"  # Change to the folder where the tex file is located
+            make 
+            make clean
+            cd ../..  # Go back to root folder
           done
           
       # Commit the generated PDF back to the repository
