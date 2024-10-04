@@ -34,7 +34,9 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
+            tex-fmt --check $file
             tex-fmt $file
+            tex-fmt --check $file
           done
 
       # Commit the formatted tex files back to the repository
