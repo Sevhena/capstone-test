@@ -1,11 +1,10 @@
 name: 'Format tex files'
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**/*.tex'
-
+  workflow_run:
+    workflows: ['Compile LaTeX Document']
+    types:
+      - completed
 jobs:
   build:
     runs-on: ubuntu-latest
