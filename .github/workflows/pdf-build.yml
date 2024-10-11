@@ -1,10 +1,10 @@
-name: 'Compile LaTeX Document'
+name: "Compile LaTeX Document"
 
 on:
   push:
     branches: [main]
     paths:
-      - 'docs/**/*.tex'
+      - "docs/**/*.tex"
 
 jobs:
   build:
@@ -16,12 +16,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Tex Live
-        uses: teatimeguest/setup-texlive-action@v3
+      # Cache TeX Live installation
+      - name: Cache TeX Live
+        uses: actions/cache@v4
         with:
-          packages: |
-            scheme-medium
-            latexmk
+          path: |
+            /usr/local/texlive # Adjust to where TeX Live is installed
+            /usr/share/texlive
+            ~/.texlive
+          key: texlive-2024-${{ runner.os }}-latexmk
+          restore-keys: |
+            texlive-
+
+      # Install TeX Live and latexmk if cache is not available
+      - name: Install TeX Live and latexmk
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive-latex-extra texlive-science latexmk
 
       # Get changed .tex files
       - name: Get changed .tex files
@@ -30,7 +42,7 @@ jobs:
         with:
           files: |
             **/*.tex
-          diff_relative: true  # Get the list of files relative to the repo root
+          diff_relative: true # Get the list of files relative to the repo root
 
       # Build LaTeX files
       - name: Build changed tex files
@@ -38,24 +50,16 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
         run: |
-          whereis latex
-          whereis latexmk
-          cd ~
-          ls -a
-          cd -
           for file in ${ALL_CHANGED_FILES}; do
             filename=$(basename -- "$file")
             folder=$(dirname "$file")  # Get the folder of the file
             echo "Building $filename"
             cd "$folder"  # Change to the folder where the tex file is located
             make 
-            ls
             make clean
-            ls
             cd -  # Go back to root folder
           done
-          git status
-          
+
       # Commit the generated PDF back to the repository
       - name: Commit & Push changes
         env:
@@ -66,3 +70,44 @@ jobs:
           author_name: "Github Action"
           author_email: "action@github.com"
           message: "Add compiled PDF"
+
+  format:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Install tex-fmt
+        run: |
+          sudo apt install cargo
+          cargo install tex-fmt
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+    # Get changed .tex files
+      - name: Get changed .tex files
+        id: changed-tex-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.tex
+          diff_relative: true  # Get the list of files relative to the repo root
+
+      # Format LaTeX files
+      - name: Format changed tex files
+        if: steps.changed-tex-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-tex-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            tex-fmt $file
+          done
+
+      # Commit the formatted tex files back to the repository
+      - name: Commit & Push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: --force docs/**/*.pdf
+          author_name: "Github Action"
+          author_email: "action@github.com"
+          message: "format changed .tex files"
