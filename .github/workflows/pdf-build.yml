@@ -68,6 +68,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: --force docs/**/*.pdf
+          tag_push: '--force'
           author_name: "Github Action"
           author_email: "action@github.com"
           message: "Add compiled PDF"
